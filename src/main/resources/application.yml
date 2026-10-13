@@ -1,1 +1,31 @@
-springapplication.name=Tavern
+server:
+  port: 8081
+spring:
+  profiles:
+    active: dev
+    include: secret # 引入额外的配置文件
+  application:
+    name: Tavern
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${db.mysql.url}:3306/Tavern?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${db.mysql.username}
+    password: ${db.mysql.password}
+  data:
+    redis:
+      host: ${db.redis.url}
+      port: ${db.redis.port}
+      password: ${db.redis.password}
+      lettuce:
+        pool:
+          max-active: 10
+  security:
+    user:
+      name: user
+      password: $2a$10$SPKCn5cwJ4HZOmg01M4VaOFJlXLmVm6P3PQXT9ytUPJeE1AdztJsS #123
+  jackson:
+    default-property-inclusion: non_null
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

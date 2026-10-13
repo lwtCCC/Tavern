@@ -1,4 +1,10 @@
-package com.lwt.tavern.entry.DTO;
+package com.lwt.tavern.entry.dto;
 
+import lombok.Data;
+
+@Data
 public class UserDTO {
+    private Long id;
+    private String username;
+    private String avatar;
 }
