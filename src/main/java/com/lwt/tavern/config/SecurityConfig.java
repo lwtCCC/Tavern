@@ -1,4 +1,4 @@
-package com.lwt.tavern.common;
+package com.lwt.tavern.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -7,21 +7,24 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.lwt.tavern.common.JWTUtil;
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.entry.dto.LoginDTO;
-import com.lwt.tavern.entry.dto.UserDTO;
+import com.lwt.tavern.common.SnowFlake;
+import com.lwt.tavern.dto.LoginDTO;
+import com.lwt.tavern.dto.UserDTO;
 import com.lwt.tavern.entry.User;
 import com.lwt.tavern.mapper.UserMapper;
 import com.lwt.tavern.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
-import static com.lwt.tavern.common.RedisConstants.LOGIN_CODE_KEY;
-import static com.lwt.tavern.common.RedisConstants.LOGIN_TOKEN_KEY;
+import static com.lwt.tavern.common.CommonConstants.USER_PREFIX;
+import static com.lwt.tavern.common.RedisConstants.*;
 
 @Slf4j
 @Service
@@ -33,6 +36,115 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final JWTUtil jwtUtil;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final SnowFlake userSnowFlake;
+
+    /**
+     * 发送验证码
+     * @param phone 手机号
+     * @return 验证码
+     */
+    @Override
+    public Result sendCode(String phone) {
+        return getCode(LOGIN_CODE_KEY,phone,LOGIN_CODE_KEY_TTL,TimeUnit.SECONDS);
+    }
+
+    /**
+     * 发送验证码(注册验证码)
+     * @param phone 手机号
+     * @return 验证码
+     */
+    @Override
+    public Result sendCodeRegister(String phone) {
+        return getCode(REGISTER_CODE_KEY,phone,REGISTER_CODE_KEY_TTL,TimeUnit.SECONDS);
+    }
+
+    private Result getCode(String prefix,String phone,Long ttl,TimeUnit timeUnit) {
+        //1.校验手机号 TODO 校验格式
+        if (StrUtil.isBlank(phone)){
+            return Result.fail("手机号错误");
+        }
+        //2.检查验证码是否存在
+        String oldCode = stringRedisTemplate.opsForValue().get(prefix + phone);
+        if (StrUtil.isNotBlank(oldCode)){
+            //如果已经存在，则直接返回
+            return Result.success(oldCode);
+        }
+        //3.生成验证码
+        String code = RandomUtil.randomNumbers(4);
+        //4.在redis存储验证码
+        stringRedisTemplate.opsForValue()
+                .set(prefix + phone, code, ttl, timeUnit);
+        //5.发送验证码
+        return Result.success(code);
+    }
+
+    /**
+     * 注册功能
+     * @param loginDTO 登录用dto
+     * @return token
+     */
+    @Override
+    public Result register(LoginDTO loginDTO) {
+        //1.获取手机号，密码，验证码
+        String phone = loginDTO.getPhone();
+        String password = loginDTO.getPassword();
+        String code = loginDTO.getCode();
+        //2.非空判断
+        if (StrUtil.isBlank(phone) || StrUtil.isBlank(password) || StrUtil.isBlank(code)){
+            return Result.fail("手机号或者密码不能为空");
+        }
+
+        if (StrUtil.isBlank(code)){
+            return Result.fail("验证码不能为空");
+        }
+        //3.校验验证码
+        String codeORI = stringRedisTemplate.opsForValue().get(REGISTER_CODE_KEY + phone);
+        if (!code.equals(codeORI)){
+            return Result.fail("验证码不同，请重新输入");
+        }
+
+        //防止重复注册，按照手机号查一下是否存在
+        User userOld = query().eq("phone", phone).one();
+        if (userOld != null){
+            return Result.fail("该手机号已注册");
+        }
+
+        //4.写入数据库
+        //随机生成一个用户名
+        String username = USER_PREFIX + RandomUtil.randomString(8);
+        //雪花id
+        Long id = userSnowFlake.nextId();
+        User user = new User(
+                id,
+                username,
+                passwordEncoder.encode(password),
+                "aaaa",
+                "hello",
+                (short) 0,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                phone,
+                1,
+                100L,
+                1000L,
+                100L);
+
+        save(user);
+        //6.生成token
+        String token = jwtUtil.createToken(id, username);
+        //7.将用户和token放入redis
+        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        stringRedisTemplate.opsForValue()
+                .set(
+                        LOGIN_TOKEN_KEY + token,
+                        JSONUtil.toJsonStr(userDTO),
+                        LOGIN_TOKEN_KEY_TTL,
+                        TimeUnit.MINUTES
+                );
+        //8.返回token
+        return Result.success(token);
+    }
 
     /**
      * 用户名密码登录
@@ -55,10 +167,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return Result.fail("该用户不存在，请先注册");
         }
         //4.生成token
-        String token = jwtUtil.createToken(user.getId(), user.getUsername());
+        String token = jwtUtil.createToken(user.getId(), username);
         //5.将用户和token放入redis
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        stringRedisTemplate.opsForValue().set(LOGIN_TOKEN_KEY + token, JSONUtil.toJsonStr(userDTO));
+        stringRedisTemplate.opsForValue()
+                .set(
+                        LOGIN_TOKEN_KEY + token,
+                        JSONUtil.toJsonStr(userDTO),
+                        LOGIN_TOKEN_KEY_TTL,
+                        TimeUnit.MINUTES
+                );
         //6.返回token
         return Result.success(token);
     }
@@ -85,37 +203,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //4.删除原有验证码
         Boolean delete = stringRedisTemplate.delete(LOGIN_CODE_KEY + phone);
+        if (!delete){
+            System.out.println("验证码删除失败");
+        }
         //5.查询用户
         User user = query().eq("phone", phone).one();
         //6.生成token
         String token = jwtUtil.createToken(user.getId(), user.getUsername());
         //7.将用户和token放入redis
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        stringRedisTemplate.opsForValue().set(LOGIN_TOKEN_KEY + token, JSONUtil.toJsonStr(userDTO));
+        stringRedisTemplate.opsForValue()
+                .set(
+                        LOGIN_TOKEN_KEY + token,
+                        JSONUtil.toJsonStr(userDTO),
+                        LOGIN_TOKEN_KEY_TTL,
+                        TimeUnit.MINUTES
+                );
 
         return Result.success(token);
-    }
-
-    /**
-     * 发送验证码
-     * @param phone 手机号
-     * @return 验证码
-     */
-    @Override
-    public Result sendCode(String phone) {
-        //1.校验手机号
-        if (StrUtil.isBlank(phone)){
-            return Result.fail("手机号错误");
-        }
-
-        //2.生成验证码
-        String code = RandomUtil.randomNumbers(4);
-
-        //3.在redis存储验证码
-        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY+phone,code);
-
-        //4.发送验证码
-        return Result.success(code);
     }
 
     /**
@@ -124,7 +229,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户信息
      */
     @Override
-    public Result queryUserById(Integer id) {
+    public Result queryUserById(Long id) {
         //1.校验id是否为空
         if (id == null){
             return Result.fail("id不合法");
@@ -140,52 +245,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
         //5.返回dto
         return Result.success(userDTO);
-    }
-
-    /**
-     * 注册功能
-     * @param loginDTO 登录用dto
-     * @return token
-     */
-    @Override
-    public Result register(LoginDTO loginDTO) {
-        //1.获取手机号，密码，验证码
-        String phone = loginDTO.getPhone();
-        String password = loginDTO.getPassword();
-        String code = loginDTO.getCode();
-        //2.非空判断
-        if (StrUtil.isBlank(phone) || StrUtil.isBlank(password) || StrUtil.isBlank(code)){
-            return Result.fail("手机号或者密码不能为空");
-        }
-
-        if (StrUtil.isBlank(code)){
-            return Result.fail("验证码不能为空");
-        }
-
-        //3.校验验证码
-        String codeORI = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
-        if (!code.equals(codeORI)){
-            return Result.fail("验证码不同，请重新输入");
-        }
-        //4.写入数据库
-        //5.随机生成一个用户名
-        String username = RandomUtil.randomString(8);
-        User user = BeanUtil.copyProperties(loginDTO, User.class);
-        //用户名
-        user.setUsername(username);
-        //id
-        //创建时间
-        user.setCreateTime(LocalDateTime.now());
-        //更新时间
-        user.setUpdateTime(LocalDateTime.now());
-
-        save(user);
-        //6.生成token
-        String token = jwtUtil.createToken(user.getId(), user.getUsername());
-        //7.将用户和token放入redis
-        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        stringRedisTemplate.opsForValue().set(LOGIN_TOKEN_KEY + token, JSONUtil.toJsonStr(userDTO));
-        //8.返回token
-        return Result.success(token);
     }
 }

@@ -25,7 +25,7 @@ public class BookComment implements Serializable {
     private Long parentId;
     private Long userId;
     private String content;
-    private boolean deleted;
+    private Short deleted;
     private LocalDateTime createTime;
     private Long reply2CommentId;
 }

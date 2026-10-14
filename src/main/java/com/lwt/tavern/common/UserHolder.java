@@ -1,6 +1,6 @@
 package com.lwt.tavern.common;
 
-import com.lwt.tavern.entry.dto.UserDTO;
+import com.lwt.tavern.dto.UserDTO;
 
 public class UserHolder {
     private static ThreadLocal<UserDTO> tl = new ThreadLocal<>();

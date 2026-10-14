@@ -2,7 +2,7 @@ package com.lwt.tavern.service;
 
 import com.baomidou.mybatisplus.spring.service.IService;
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.entry.dto.LoginDTO;
+import com.lwt.tavern.dto.LoginDTO;
 import com.lwt.tavern.entry.User;
 
 public interface UserService extends IService<User> {
@@ -15,5 +15,7 @@ public interface UserService extends IService<User> {
 
     Result sendCode(String phone);
 
-    Result queryUserById(Integer id);
+    Result queryUserById(Long id);
+
+    Result sendCodeRegister(String phone);
 }

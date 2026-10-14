@@ -16,7 +16,7 @@ import java.util.Date;
 public class JWTUtil {
     // 签名密钥，生产环境应放在配置文件里，长度至少 32 字节
     private static final String SECRET = "guan-yu-ci-xiang-mu-jin-yong-yu-shi-yan";
-    private static final long EXPIRE = 3600_000L; // 1 小时
+    private static final long EXPIRE = 3600L; // 1 小时
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 

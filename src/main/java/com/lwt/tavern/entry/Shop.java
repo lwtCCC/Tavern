@@ -24,11 +24,11 @@ public class Shop implements Serializable {
     private String name;
     private Long price;
     private Integer stock;
-    private boolean status;
+    private Short status;
     private String cover;
     private String description;
     private Integer minLevel;
-    private boolean deleted;
+    private Short deleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 

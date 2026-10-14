@@ -22,7 +22,7 @@ public class BookLike implements Serializable {
     private Long id;
     private Long userId;
     private Long bookId;
-    private boolean liked;
+    private Short liked;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

@@ -25,6 +25,7 @@ public class ShopOrder implements Serializable {
     private Integer quantity;
     private Long unitPrice;
     private Long totalPrice;
+    //TODO 枚举
     private int status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

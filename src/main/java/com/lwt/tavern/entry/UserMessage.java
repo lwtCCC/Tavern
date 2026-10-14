@@ -22,11 +22,13 @@ public class UserMessage implements Serializable {
     private Long id;
     private Long userId;
     private Long sendId;
+    //TODO 枚举
     private Integer messageType;
     private String title;
     private String content;
+    //TODO 枚举
     private Integer targetType;
     private Long targetId;
-    private boolean read;
+    private Short read;
     private LocalDateTime createTime;
 }

@@ -23,17 +23,14 @@ class TavernApplicationTests {
     }
 
     @Test
-    public void testUser(){
-        User user = userService.getById(1);
-        System.out.println(user);
+    void testTime() {
+        System.out.println(System.currentTimeMillis());
     }
 
     @Test
-    public void testQueryUserById(){
-        Result result = userService.queryUserById(1);
-        System.out.println("============================");
-        System.out.println(result);
-        System.out.println("============================");
+    public void testUser(){
+        User user = userService.getById(1);
+        System.out.println(user);
     }
 
     @Test

@@ -22,7 +22,7 @@ public class BookStar implements Serializable {
     private Long id;
     private Long userId;
     private Long bookId;
-    private boolean stared;
+    private Short stared;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

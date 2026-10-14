@@ -1,7 +1,7 @@
 package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.entry.dto.LoginDTO;
+import com.lwt.tavern.dto.LoginDTO;
 import com.lwt.tavern.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +20,19 @@ public class UserController {
      * @param phone 手机号
      * @return 带有验证码的消息
      */
-    @PostMapping("/code")
+    @PostMapping("/login/code")
     public Result sendCode(@RequestParam("phone") String phone){
         return userService.sendCode(phone);
     }
-
+    /**
+     * 根据手机号发送验证码(注册用)
+     * @param phone 手机号
+     * @return 带有验证码的消息
+     */
+    @PostMapping("/register/code")
+    public Result sendCodeRegister(@RequestParam("phone") String phone){
+        return userService.sendCodeRegister(phone);
+    }
     /**
      * 注册功能
      * @param loginDTO 登录信息
@@ -59,7 +67,8 @@ public class UserController {
      * @return 该用户的信息
      */
     @GetMapping("/{id}")
-    public Result queryUserById(@PathVariable("id") Integer id){
+    public Result queryUserById(@PathVariable("id") Long id){
         return userService.queryUserById(id);
     }
+
 }

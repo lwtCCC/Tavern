@@ -43,7 +43,7 @@ public class User implements Serializable {
      * 逻辑删除
      */
     @TableField("is_deleted")
-    private Integer deleted;
+    private Short deleted;
     /**
      * 创建时间
      */

@@ -24,6 +24,6 @@ public class MailBox implements Serializable {
     private String mailContent;
     private LocalDateTime sendTime;
     private Long sendId;
-    private boolean deletedUser;
-    private boolean deletedSend;
+    private Short deletedUser;
+    private Short deletedSend;
 }
