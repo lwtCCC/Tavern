@@ -8,11 +8,15 @@ import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.lwt.tavern.common.JWTUtil;
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.common.SnowFlake;
-import com.lwt.tavern.dto.LoginDTO;
-import com.lwt.tavern.dto.UserDTO;
+import com.lwt.tavern.common.UserHolder;
+import com.lwt.tavern.dto.user.LoginDTO;
+import com.lwt.tavern.dto.user.ResetPasswordDTO;
+import com.lwt.tavern.dto.user.UserDTO;
 import com.lwt.tavern.entry.User;
 import com.lwt.tavern.mapper.UserMapper;
 import com.lwt.tavern.service.UserService;
+import com.lwt.tavern.vo.MyUserVO;
+import com.lwt.tavern.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.lwt.tavern.common.CommonConstants.USER_PREFIX;
@@ -28,16 +33,24 @@ import static com.lwt.tavern.common.RedisConstants.*;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final StringRedisTemplate stringRedisTemplate;
-
     private final JWTUtil jwtUtil;
-
     private final PasswordEncoder passwordEncoder;
-
     private final SnowFlake userSnowFlake;
+
+    public UserServiceImpl(
+            StringRedisTemplate stringRedisTemplate,
+            JWTUtil jwtUtil,
+            PasswordEncoder passwordEncoder,
+            @Qualifier("userSnowFlake") SnowFlake userSnowFlake){
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+        this.userSnowFlake = userSnowFlake;
+    }
 
     /**
      * 发送验证码
@@ -58,6 +71,100 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Result sendCodeRegister(String phone) {
         return getCode(REGISTER_CODE_KEY,phone,REGISTER_CODE_KEY_TTL,TimeUnit.SECONDS);
     }
+
+    @Override
+    public Result me() {
+        UserDTO user = UserHolder.getUser();
+        Long id = user.getId();
+        User queryUser = query().eq("id", id).one();
+        if (BeanUtil.isEmpty(queryUser)) {
+            return Result.fail("登录超时，请重新登录");
+        }
+        MyUserVO myUserVO = BeanUtil.copyProperties(queryUser, MyUserVO.class);
+        return Result.success(myUserVO);
+    }
+
+    @Override
+    public Result resetSendCode(String phone) {
+        return getCode(RESET_CODE_KEY,phone,RESET_CODE_KEY_TTL,TimeUnit.SECONDS);
+    }
+
+    @Override
+    public Result verify(LoginDTO loginDTO) {
+        //1.获取手机号和验证码
+        String phone = loginDTO.getPhone();
+        String code = loginDTO.getCode();
+        //2.判断非空
+        if (StrUtil.isBlank(phone) || StrUtil.isBlank(code)){
+            return Result.fail("用户名或密码不能为空");
+        }
+        //3.和redis的验证码比较
+        String codeORI = stringRedisTemplate.opsForValue().get(RESET_CODE_KEY+phone);
+        if (codeORI != null && !codeORI.equals(code)){
+            return Result.fail("验证码错误");
+        }
+
+        //4.删除原有验证码
+        Boolean delete = stringRedisTemplate.delete(RESET_CODE_KEY + phone);
+        if (!delete){
+            System.out.println("验证码删除失败");
+        }
+        //返回成功
+        return Result.success(true);
+    }
+
+    @Override
+    public Result resetPassword(ResetPasswordDTO resetPasswordDTO) {
+
+        UserDTO userDTO = UserHolder.getUser();
+        Long id = userDTO.getId();
+
+        if (BeanUtil.isEmpty(id)){
+            return Result.fail("");
+        }
+
+        if (BeanUtil.isEmpty(resetPasswordDTO)){
+            return Result.fail("");
+        }
+        String newPassword = resetPasswordDTO.getNewPassword();
+        String confirmPassword = resetPasswordDTO.getConfirmPassword();
+
+        if (!newPassword.equals(confirmPassword)){
+            return Result.fail("");
+        }
+
+        User user = query().eq("id", id).one();
+        String oldPassword = user.getPassword();
+        String encodePassword = passwordEncoder.encode(newPassword);
+        if (Objects.equals(encodePassword, oldPassword)){
+            return Result.fail("");
+        }
+
+        user.setPassword(encodePassword);
+        save(user);
+        return Result.success(user);
+    }
+
+    @Override
+    public Result resetProfile(String profile) {
+        UserDTO userDTO = UserHolder.getUser();
+        Long id = userDTO.getId();
+        if (BeanUtil.isEmpty(id)){
+            return Result.fail("");
+        }
+        User user = query().eq("id", id).one();
+
+        if (StrUtil.isBlank(profile)){
+            user.setProfile("该用户暂无留言");
+            save(user);
+        }
+
+        user.setProfile(profile);
+        save(user);
+
+        return Result.success(user);
+    }
+
 
     private Result getCode(String prefix,String phone,Long ttl,TimeUnit timeUnit) {
         //1.校验手机号 TODO 校验格式
@@ -241,9 +348,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             //直接返回空
             return Result.success();
         }
-        //4.转dto
-        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        //4.转vo
+        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
         //5.返回dto
-        return Result.success(userDTO);
+        return Result.success(userVO);
     }
 }

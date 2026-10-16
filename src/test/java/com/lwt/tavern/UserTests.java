@@ -1,7 +1,7 @@
 package com.lwt.tavern;
 
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.dto.LoginDTO;
+import com.lwt.tavern.dto.user.LoginDTO;
 import com.lwt.tavern.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

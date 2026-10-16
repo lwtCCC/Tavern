@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -24,4 +26,6 @@ public class BookContentBlock implements Serializable {
     private Integer blockIndex;
     private String content;
     private LocalDateTime createTime;
+    private String blockType;
+    private Map<String, Object> attributes;
 }

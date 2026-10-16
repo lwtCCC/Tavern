@@ -1,16 +1,14 @@
-package com.lwt.tavern.dto;
+package com.lwt.tavern.dto.user;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
+public class UserDTO {
+    private Long id;
     private String username;
     private String phone;
-    private String password;
-    private String code;
 }

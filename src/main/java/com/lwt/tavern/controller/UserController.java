@@ -1,7 +1,9 @@
 package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.dto.LoginDTO;
+import com.lwt.tavern.dto.user.LoginDTO;
+import com.lwt.tavern.dto.user.ResetPasswordDTO;
+import com.lwt.tavern.dto.user.UserDTO;
 import com.lwt.tavern.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +71,54 @@ public class UserController {
     @GetMapping("/{id}")
     public Result queryUserById(@PathVariable("id") Long id){
         return userService.queryUserById(id);
+    }
+
+    /**
+     * 查询自己的详细信息
+     * @return 返回自己的详细信息，但是不包括是否删除
+     */
+    @PostMapping("/me")
+    public Result me(){
+        return userService.me();
+    }
+
+    /**
+     * 发送验证码（修改密码用的）
+     * @param phone 手机号码
+     * @return code
+     */
+    @PostMapping("/reset/code")
+    public Result resetSendCode(@RequestBody String phone){
+        return userService.resetSendCode(phone);
+    }
+
+    /**
+     * 修改密码的身份验证
+     * @param loginDTO 包含手机号和验证码
+     * @return 是否成功
+     */
+    @PostMapping("/reset/verify")
+    public Result verify(@RequestBody LoginDTO loginDTO){
+        return userService.verify(loginDTO);
+    }
+    /**
+     * 修改密码
+     * @param resetPasswordDTO 包含新密码和确认密码
+     * @return 完整的用户信息，以覆盖旧的
+     */
+    @PutMapping("/reset/password")
+    public Result resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO){
+        return userService.resetPassword(resetPasswordDTO);
+    }
+
+    /**
+     * 修改简介
+     * @param userDTO
+     * @return
+     */
+    @PutMapping("/reset/profile")
+    public Result resetProfile(@RequestBody String profile){
+        return userService.resetProfile(profile);
     }
 
 }

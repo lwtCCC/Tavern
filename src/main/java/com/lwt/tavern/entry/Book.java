@@ -1,6 +1,5 @@
 package com.lwt.tavern.entry;
 
-
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,4 +62,8 @@ public class Book implements Serializable {
      * 封面
      */
     private String cover;
+    /**
+     * 基础描述
+     */
+    private String description;
 }

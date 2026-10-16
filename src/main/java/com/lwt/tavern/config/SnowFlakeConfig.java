@@ -11,4 +11,14 @@ public class SnowFlakeConfig {
     public SnowFlake userSnowFlake() {
         return new SnowFlake(1,1);
     }
+
+    @Bean("bookSnowFlake")
+    public SnowFlake bookSnowFlake() {
+        return new SnowFlake(2,1);
+    }
+
+    @Bean("bookContentBlockSnowFlake")
+    public SnowFlake bookContentBlockSnowFlake() {
+        return new SnowFlake(3,1);
+    }
 }

@@ -4,7 +4,7 @@ package com.lwt.tavern.Interceptor;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.lwt.tavern.common.UserHolder;
-import com.lwt.tavern.dto.UserDTO;
+import com.lwt.tavern.dto.user.UserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

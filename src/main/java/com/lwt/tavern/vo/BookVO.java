@@ -1,11 +1,13 @@
 package com.lwt.tavern.vo;
 
+import com.lwt.tavern.entry.Book;
 import com.lwt.tavern.entry.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -28,10 +30,6 @@ public class BookVO {
      */
     private Long viewCount;
     /**
-     * 用户id
-     */
-    private Long userId;
-    /**
      * 点赞数量
      */
     private Long likeCount;
@@ -48,10 +46,6 @@ public class BookVO {
      */
     private LocalDateTime updateTime;
     /**
-     * 逻辑删除
-     */
-    private Short deleted;
-    /**
      * 封面
      */
     private String cover;
@@ -59,4 +53,8 @@ public class BookVO {
      * 作者
      */
     private User user;
+    /**
+     * 书的内容(分段)
+     */
+    private List<BookContentBlockVO> bookContentBlockVO;
 }

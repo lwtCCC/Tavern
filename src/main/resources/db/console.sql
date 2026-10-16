@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `book` (
                                           ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                                       `is_deleted` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '逻辑删除，0正常，1删除',
                                       `cover` VARCHAR(255) NOT NULL COMMENT '封面地址',
+                                      `description` VARCHAR(255) COMMENT '文章描述',
                                       PRIMARY KEY (`id`),
                                       UNIQUE KEY `uk_book_name` (`book_name`),
                                       KEY `idx_user_time` (`user_id`, `create_time`, `id`),
@@ -87,6 +88,8 @@ CREATE TABLE IF NOT EXISTS `book_content_block` (
                                                     `block_index` INT NOT NULL COMMENT '书内顺序，从0或1开始均可，但必须统一',
                                                     `content` TEXT NOT NULL COMMENT 'Markdown解析后的内容块',
                                                     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                                    `block_type`  VARCHAR(32) NOT NULL COMMENT '段评类型paragraph/heading/code/quote/image...',
+                                                    `attributes`  JSON,
                                                     PRIMARY KEY (`id`),
                                                     UNIQUE KEY `uk_book_block_index` (`book_id`, `block_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='书籍内容块表';
@@ -133,7 +136,7 @@ CREATE TABLE `shop` (
                         `stock` INT NOT NULL DEFAULT 0 COMMENT '商品库存数量',
                         `status` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '商品状态：0下架，1上架',
                         `cover` VARCHAR(255) DEFAULT NULL COMMENT '商品封面图片URL或存储路径',
-                        `description` TEXT COMMENT '商品描述',
+                        `description` VARCHAR(255) COMMENT '商品描述',
                         `min_level` INT NOT NULL DEFAULT 0 COMMENT '购买所需最低等级',
                         `is_deleted` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '逻辑删除：0正常，1删除',
                         `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

@@ -1,16 +1,15 @@
-package com.lwt.tavern.dto;
+package com.lwt.tavern.dto.user;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
-    private Long id;
+public class LoginDTO {
     private String username;
+    private String phone;
+    private String password;
+    private String code;
 }
