@@ -16,7 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Accessors(chain = true)
-@TableName("`book_content_block`")
+@TableName(value = "`book_content_block`")
 public class BookContentBlock implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -27,5 +27,6 @@ public class BookContentBlock implements Serializable {
     private String content;
     private LocalDateTime createTime;
     private String blockType;
+
     private Map<String, Object> attributes;
 }

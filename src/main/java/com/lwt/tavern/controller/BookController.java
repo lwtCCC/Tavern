@@ -2,7 +2,7 @@ package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.dto.book.BookDTO;
-import com.lwt.tavern.entry.Book;
+import com.lwt.tavern.query.BookQuery;
 import com.lwt.tavern.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +13,15 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
 
     private final BookService bookService;
+
+    /**
+     * 分页查询，用于首页第一次展示
+     */
+    @GetMapping("/page/hot")
+    public Result pageBookByHot(BookQuery bookQuery) {
+
+        return bookService.pageBookByHot(bookQuery);
+    }
 
     /**
      * 查看具体的书
@@ -45,22 +54,17 @@ public class BookController {
     }
 
     /**
-     * 分页查询，用于首页第一次展示
-     * @param pageNum
-     * @param pageSize
+     * 查询自己的书，按热度
      * @return
      */
-    @GetMapping("/page")
-    public Result pageBook(
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-
-        return bookService.pageList(pageNum,pageSize);
+    @GetMapping("/me")
+    public Result queryMyBooks(BookQuery bookQuery){
+        return bookService.queryMyBooks(bookQuery);
     }
 
     /**
      * 查询自己的书，按热度
-     * @return
+     * @return 分页查询结果
      */
     @GetMapping("/me/hot")
     public Result queryMyBooksByHot(){
@@ -69,7 +73,7 @@ public class BookController {
 
     /**
      * 查询自己的书，按时间
-     * @return
+     * @return 分页查询结果
      */
     @GetMapping("/me/hot")
     public Result queryMyBooksByTime(){
