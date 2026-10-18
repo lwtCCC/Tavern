@@ -3,15 +3,19 @@ package com.lwt.tavern.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 public class BookContentBlockVO {
-
+    /**
+     * 内容id
+     */
     private Long id;
+    /**
+     * 关联书籍id
+     */
     private Long bookId;
-    private Integer blockIndex;
+    /**
+     * 内容
+     */
     private String content;
-    private LocalDateTime createTime;
 }

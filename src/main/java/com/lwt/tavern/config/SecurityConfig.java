@@ -3,6 +3,7 @@ package com.lwt.tavern.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,13 +21,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()   // 先全部放行，调试用
                 )
-                .httpBasic(basic -> basic.disable())   // 关掉浏览器弹框
-                .formLogin(form -> form.disable());    // 关掉默认登录页
+                .httpBasic(AbstractHttpConfigurer::disable)   // 关掉浏览器弹框
+                .formLogin(AbstractHttpConfigurer::disable);    // 关掉默认登录页
         return http.build();
     }
 }

@@ -27,8 +27,4 @@ public class UserVO {
      * 更新时间
      */
     private LocalDateTime updateTime;
-    /**
-     * 等级
-     */
-    private Integer level;
 }

@@ -17,6 +17,10 @@ public class PageDTO<T> {
      */
     private Long pages;
     /**
+     * 最后一项id
+     */
+    private Long id;
+    /**
      * 数据集合
      */
     private List<T> list;

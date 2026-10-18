@@ -1,6 +1,6 @@
 package com.lwt.tavern.common;
 
-import com.lwt.tavern.entry.BookContentBlock;
+import com.lwt.tavern.entity.BookContentBlock;
 import lombok.RequiredArgsConstructor;
 import org.commonmark.node.*;
 import org.commonmark.parser.Parser;

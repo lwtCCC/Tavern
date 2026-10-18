@@ -21,4 +21,9 @@ public class SnowFlakeConfig {
     public SnowFlake bookContentBlockSnowFlake() {
         return new SnowFlake(3,1);
     }
+
+    @Bean("shopSnowFlake")
+    public SnowFlake shopSnowFlake() {
+        return new SnowFlake(4,1);
+    }
 }

@@ -12,12 +12,10 @@ import com.lwt.tavern.common.UserHolder;
 import com.lwt.tavern.dto.user.LoginDTO;
 import com.lwt.tavern.dto.user.ResetPasswordDTO;
 import com.lwt.tavern.dto.user.UserDTO;
-import com.lwt.tavern.entry.User;
+import com.lwt.tavern.entity.User;
 import com.lwt.tavern.mapper.UserMapper;
 import com.lwt.tavern.service.UserService;
-import com.lwt.tavern.vo.MyUserVO;
 import com.lwt.tavern.vo.UserVO;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -74,14 +72,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Result me() {
+        //1.获取自己的id
         UserDTO user = UserHolder.getUser();
-        Long id = user.getId();
-        User queryUser = query().eq("id", id).one();
-        if (BeanUtil.isEmpty(queryUser)) {
+        if (BeanUtil.isEmpty(user)) {
             return Result.fail("登录超时，请重新登录");
         }
-        MyUserVO myUserVO = BeanUtil.copyProperties(queryUser, MyUserVO.class);
-        return Result.success(myUserVO);
+        Long id = user.getId();
+        //2.查询数据库获取用户详细信息
+        User queryUser = query().eq("id", id).one();
+        if (BeanUtil.isEmpty(queryUser)) {
+            return Result.fail("该用户不存在");
+        }
+        //3.基础 信息封装成 vo 给前端
+        UserVO userVO = BeanUtil.copyProperties(queryUser, UserVO.class);
+        return Result.success(userVO);
     }
 
     @Override
@@ -142,7 +146,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         user.setPassword(encodePassword);
         save(user);
-        return Result.success(user);
+        return Result.success();
     }
 
     @Override
@@ -161,13 +165,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         user.setProfile(profile);
         save(user);
-
-        return Result.success(user);
+        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
+        return Result.success(userVO);
     }
 
 
     private Result getCode(String prefix,String phone,Long ttl,TimeUnit timeUnit) {
-        //1.校验手机号 TODO 校验格式
+        //1.校验手机号
         if (StrUtil.isBlank(phone)){
             return Result.fail("手机号错误");
         }
@@ -222,20 +226,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String username = USER_PREFIX + RandomUtil.randomString(8);
         //雪花id
         Long id = userSnowFlake.nextId();
-        User user = new User(
-                id,
-                username,
-                passwordEncoder.encode(password),
-                "aaaa",
-                "hello",
-                (short) 0,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                phone,
-                1,
-                100L,
-                1000L,
-                100L);
+        User user = new User(id, username, passwordEncoder.encode(password),
+                "aaaa", "hello", LocalDateTime.now(), LocalDateTime.now(), phone);
 
         save(user);
         //6.生成token

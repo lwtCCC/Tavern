@@ -64,6 +64,15 @@ public class UserController {
     }
 
     /**
+     * 展示自己的信息
+     * @return 返回自己的详细信息，但是不包括是否删除
+     */
+    @PostMapping("/me")
+    public Result me(){
+        return userService.me();
+    }
+
+    /**
      * 根据id查询用户
      * @param id 前端传来的id
      * @return 该用户的信息
@@ -71,15 +80,6 @@ public class UserController {
     @GetMapping("/{id}")
     public Result queryUserById(@PathVariable("id") Long id){
         return userService.queryUserById(id);
-    }
-
-    /**
-     * 查询自己的详细信息
-     * @return 返回自己的详细信息，但是不包括是否删除
-     */
-    @PostMapping("/me")
-    public Result me(){
-        return userService.me();
     }
 
     /**
@@ -113,7 +113,7 @@ public class UserController {
 
     /**
      * 修改简介
-     * @param userDTO
+     * @param profile
      * @return
      */
     @PutMapping("/reset/profile")

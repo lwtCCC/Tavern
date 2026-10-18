@@ -1,7 +1,7 @@
 package com.lwt.tavern;
 
 import com.lwt.tavern.common.Result;
-import com.lwt.tavern.entry.User;
+import com.lwt.tavern.entity.User;
 import com.lwt.tavern.service.UserService;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;

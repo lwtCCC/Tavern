@@ -16,11 +16,11 @@ public class PageQuery {
      */
     private Long pageSize=10L;
     /**
-     * 排序字段
+     * 上次查询的最大值，用于优化深度分页
      */
-    private String sortBy="hot";
+    private Long maxId;
     /**
-     * 是否降序
+     * 是否升序
      */
-    private Boolean isAsc;
+    private Boolean isAsc=true;
 }
