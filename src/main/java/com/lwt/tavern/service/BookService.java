@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.spring.service.IService;
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.dto.book.BookDTO;
 import com.lwt.tavern.entity.Book;
-import com.lwt.tavern.query.BookQuery;
 import com.lwt.tavern.query.PageQuery;
 
 public interface BookService extends IService<Book> {

@@ -2,7 +2,6 @@ package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.dto.book.BookDTO;
-import com.lwt.tavern.query.BookQuery;
 import com.lwt.tavern.query.PageQuery;
 import com.lwt.tavern.service.BookService;
 import lombok.RequiredArgsConstructor;

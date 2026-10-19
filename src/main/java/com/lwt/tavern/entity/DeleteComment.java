@@ -10,48 +10,40 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 商品评论
- */
 @Data
-@AllArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
 @Accessors(chain = true)
-@TableName("`shop_comment`")
-public class ShopComment implements Serializable {
+@TableName("`delete_comment`")
+public class DeleteComment implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
-     * 评论id
+     * 段评id
      */
     private Long id;
     /**
-     * 商品id
+     * 书本id
      */
-    private Long shopId;
+    private Long entityId;
     /**
-     * 评论人id
+     * 内容块id
+     */
+    private Long root;
+    /**
+     * 评论用户id
      */
     private Long userId;
     /**
-     * 关联订单id，用于判断是否购买
-     */
-    private Long orderId;
-    /**
-     * 父评论，顶层为null
+     * 父评论
      */
     private Long parentId;
     /**
-     * 回复人id
-     */
-    private Long reply2CommentId;
-    /**
-     * 内容
+     * 评论内容
      */
     private String content;
     /**
-     * 发布时间
+     * 创建时间
      */
     private LocalDateTime createTime;
 }

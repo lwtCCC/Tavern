@@ -1,5 +1,9 @@
 package com.lwt.tavern.controller;
 
+import com.lwt.tavern.common.Result;
+import com.lwt.tavern.dto.CommentDTO;
+import com.lwt.tavern.query.PageCommentQuery;
+import com.lwt.tavern.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,21 +12,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/comment")
 public class CommentController {
 
+    private final CommentService commentService;
 
-    /*@GetMapping("/list")                 // 查某目标的评论（targetId + targetType）
-    public RequestMapping commentList(){
-        return
+    @GetMapping("/hot")
+    public Result getRootComment(PageCommentQuery query){
+        return commentService.getRootComment(query);
     }
 
-    @PostMapping                         // 发评论
+    @PostMapping("/public")
+    public Result addComment(@RequestBody CommentDTO commentDTO){
+        return commentService.addComment(commentDTO);
+    }
 
-    @DeleteMapping("/{id}")              // 删评论
-
-    @PostMapping("/{id}/reply")          // 回复
-
-    @PostMapping("/{id}/like")           // 评论点赞
-
-    @GetMapping("/my")                   // 我的评论*/
+    @DeleteMapping("/{id}")
+    public Result deleteComment(@PathVariable Long id){
+        return commentService.deleteComment(id);
+    }
 
     
 }

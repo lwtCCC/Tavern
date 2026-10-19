@@ -10,15 +10,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 段评类(删除用)
- */
 @Data
 @EqualsAndHashCode
 @AllArgsConstructor
 @Accessors(chain = true)
-@TableName("`delete_book_comment`")
-public class DeleteBookComment implements Serializable {
+@TableName("`comment`")
+public class Comment implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     /**
@@ -28,19 +25,19 @@ public class DeleteBookComment implements Serializable {
     /**
      * 书本id
      */
-    private Long bookId;
+    private Long entityId;
     /**
      * 内容块id
      */
-    private Long blockId;
-    /**
-     * 父评论
-     */
-    private Long parentId;
+    private Long root;
     /**
      * 评论用户id
      */
     private Long userId;
+    /**
+     * 父评论
+     */
+    private Long parentId;
     /**
      * 评论内容
      */
@@ -49,8 +46,4 @@ public class DeleteBookComment implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
-    /**
-     * 回复id
-     */
-    private Long reply2CommentId;
 }

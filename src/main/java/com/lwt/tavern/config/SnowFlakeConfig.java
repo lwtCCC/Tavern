@@ -31,4 +31,9 @@ public class SnowFlakeConfig {
     public SnowFlake shopOrderFlake() {
         return new SnowFlake(5,1);
     }
+
+    @Bean("commentSnowFlake")
+    public SnowFlake commentSnowFlake() {
+        return new SnowFlake(6,1);
+    }
 }

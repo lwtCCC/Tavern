@@ -379,14 +379,39 @@ CREATE TABLE IF NOT EXISTS `mailbox` (
 
 CREATE TABLE IF NOT EXISTS `comment` (
                                               `id` BIGINT NOT NULL COMMENT '评论id',
-                                              `entity_id` BIGINT NOT NULL COMMENT '所属实体id',
-                                              `root` BIGINT DEFAULT 0 COMMENT '顶层评论id，0表示顶层评论',
+                                              `entity_id` BIGINT NOT NULL COMMENT '所属实体id,这里指书本或者商品',
+                                              `root` BIGINT DEFAULT 0 COMMENT '0表示顶层评论，其余为回复',
                                               `user_id` BIGINT NOT NULL COMMENT '发表者id',
                                               `content` VARCHAR(255) NOT NULL COMMENT '评论内容',
                                               `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发表时间',
-                                              `parent_id` BIGINT DEFAULT NULL COMMENT '实际回复的评论id',
+                                              `parent_id` BIGINT DEFAULT NULL COMMENT '父级别评论，0为根',
                                               PRIMARY KEY (`id`),
                                               KEY `idx_block_parent_time` (`entity_id`, `root`, `create_time`, `id`),
                                               KEY `idx_book_time` (`entity_id`, `create_time`, `id`),
                                               KEY `idx_user_time` (`user_id`, `create_time`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论表';
+
+CREATE TABLE IF NOT EXISTS `delete_comment` (
+                                         `id` BIGINT NOT NULL COMMENT '评论id',
+                                         `entity_id` BIGINT NOT NULL COMMENT '所属实体id,这里指书本或者商品',
+                                         `root` BIGINT DEFAULT 0 COMMENT '0表示顶层评论，其余为回复',
+                                         `user_id` BIGINT NOT NULL COMMENT '发表者id',
+                                         `content` VARCHAR(255) NOT NULL COMMENT '评论内容',
+                                         `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发表时间',
+                                         `parent_id` BIGINT DEFAULT NULL COMMENT '父级别评论，0为根',
+                                         PRIMARY KEY (`id`),
+                                         KEY `idx_block_parent_time` (`entity_id`, `root`, `create_time`, `id`),
+                                         KEY `idx_book_time` (`entity_id`, `create_time`, `id`),
+                                         KEY `idx_user_time` (`user_id`, `create_time`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论表_删除';
+
+
+CREATE TABLE IF NOT EXISTS `entity_hot_comment` (
+                                            `id` BIGINT NOT NULL COMMENT '评论id，用于查找评论表的评论',
+                                            `entity_id` BIGINT NOT NULL COMMENT '实体id，可以是书，商品，或者评论',
+                                            `hot` BIGINT NOT NULL DEFAULT 0 COMMENT '热度',
+                                            `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                            `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                                ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                            PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论热度表';
