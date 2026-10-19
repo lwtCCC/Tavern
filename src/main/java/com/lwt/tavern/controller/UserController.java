@@ -7,6 +7,7 @@ import com.lwt.tavern.dto.user.UserDTO;
 import com.lwt.tavern.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -119,6 +120,11 @@ public class UserController {
     @PutMapping("/reset/profile")
     public Result resetProfile(@RequestBody String profile){
         return userService.resetProfile(profile);
+    }
+
+    @DeleteMapping("/me")
+    public Result deleteMe(){
+        return userService.deleteMe();
     }
 
 }

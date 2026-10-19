@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.lwt.tavern.common.JWTUtil;
 import com.lwt.tavern.common.Result;
@@ -12,8 +13,10 @@ import com.lwt.tavern.common.UserHolder;
 import com.lwt.tavern.dto.user.LoginDTO;
 import com.lwt.tavern.dto.user.ResetPasswordDTO;
 import com.lwt.tavern.dto.user.UserDTO;
+import com.lwt.tavern.entity.DeleteUser;
 import com.lwt.tavern.entity.User;
 import com.lwt.tavern.mapper.UserMapper;
+import com.lwt.tavern.service.DeleteUserService;
 import com.lwt.tavern.service.UserService;
 import com.lwt.tavern.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
@@ -38,16 +41,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final JWTUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final SnowFlake userSnowFlake;
+    private final DeleteUserService deleteUserService;
 
     public UserServiceImpl(
             StringRedisTemplate stringRedisTemplate,
             JWTUtil jwtUtil,
             PasswordEncoder passwordEncoder,
-            @Qualifier("userSnowFlake") SnowFlake userSnowFlake){
+            @Qualifier("userSnowFlake") SnowFlake userSnowFlake, DeleteUserService deleteUserService){
         this.stringRedisTemplate = stringRedisTemplate;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userSnowFlake = userSnowFlake;
+        this.deleteUserService = deleteUserService;
     }
 
     /**
@@ -167,6 +172,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         save(user);
         UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
         return Result.success(userVO);
+    }
+
+    @Override
+    public Result deleteMe() {
+        Long id = UserHolder.getUser().getId();
+        User user = query().eq("id", id).one();
+        DeleteUser deleteUser = BeanUtil.copyProperties(user, DeleteUser.class);
+        deleteUserService.save(deleteUser);
+        remove(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getId, id)
+        );
+
+        return Result.success();
     }
 
 

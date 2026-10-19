@@ -2,7 +2,6 @@ package com.lwt.tavern.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
@@ -12,10 +11,8 @@ import com.lwt.tavern.common.SnowFlake;
 import com.lwt.tavern.common.UserHolder;
 import com.lwt.tavern.dto.PageDTO;
 import com.lwt.tavern.dto.book.BookDTO;
-import com.lwt.tavern.dto.user.UserDTO;
 import com.lwt.tavern.entity.*;
 import com.lwt.tavern.mapper.*;
-import com.lwt.tavern.query.BookQuery;
 import com.lwt.tavern.query.PageQuery;
 import com.lwt.tavern.service.*;
 import com.lwt.tavern.vo.BasicBookVO;
@@ -27,7 +24,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +54,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             BookContentBlockService bookContentBlockService,
             MarkdownService markdownService, MarkdownSegmenter segmenter,
             @Qualifier("bookContentBlockSnowFlake") SnowFlake bookContentBlockSnowFlake,
-            EntityHotService entityHotService, BookMapper bookMapper, EntityLikeMapper entityLikeMapper, UserMapper userMapper, EntityLikeService entityLikeService, EntityStarMapper entityStarMapper, EntityLikeCountMapper entityLikeCountMapper, EntityStarCountMapper entityStarCountMapper, EntityViewMapper entityViewMapper, DeleteBookService deleteBookService) {
+            EntityHotService entityHotService, BookMapper bookMapper, EntityLikeMapper entityLikeMapper, UserMapper userMapper, EntityStarMapper entityStarMapper, EntityLikeCountMapper entityLikeCountMapper, EntityStarCountMapper entityStarCountMapper, EntityViewMapper entityViewMapper, DeleteBookService deleteBookService) {
         this.bookSnowFlake = bookSnowFlake;
         this.stringRedisTemplate = stringRedisTemplate;
         this.bookContentBlockService = bookContentBlockService;
@@ -146,6 +142,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         List<BookContentBlock> segment = segmenter.segment(bookDTO.getContent(), bookId, id);
         bookContentBlockService.saveBatch(segment);
 
+        //TODO 在点赞，收藏等实体表添加字段
+
         return Result.success("文章保存成功");
     }
 
@@ -163,83 +161,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 .lambdaQuery()
                 .eq(EntityHot::getEntityType, 1).orderByDesc(EntityHot::getHot);
         //3.进行查询，获取热度前几
-        entityHotService.page(page,eq);
-        //4.获取相关的实体id
-        List<Long> entityIds = page.getRecords().stream().map(EntityHot::getEntityId).toList();
-        //获取书（实体）
-        List<Book> books = bookMapper.selectByIds(entityIds);
-
-        //再通过书获取用户id集合和点赞和收藏和阅览
-        Set<Long> userIds = books.stream().map(Book::getUserId).collect(Collectors.toSet());
-
-        //userId::username
-        Map<Long, String> userMap = userMapper
-                .selectByIds(userIds).stream().collect(Collectors.toMap(User::getId, User::getUsername));
-
-        List<EntityLike> entityLikes = entityLikeMapper.selectList(
-                new LambdaQueryWrapper<EntityLike>()
-                        .eq(EntityLike::getUserId, UserHolder.getUser().getId())
-                        .in(EntityLike::getEntityId, entityIds)
-        );
-
-        // 点赞过的文章id列表
-        List<Long> likeList = entityLikes.stream().map(EntityLike::getEntityId).toList();
-
-        List<EntityStar> entityStars = entityStarMapper.selectList(
-                new LambdaQueryWrapper<EntityStar>()
-                        .eq(EntityStar::getUserId, UserHolder.getUser().getId())
-                        .in(EntityStar::getEntityId, entityIds)
-        );
-
-        //收藏过的id列表
-        List<Long> starList = entityStars.stream().map(EntityStar::getEntityId).toList();
-
-        //点赞数
-        Map<Long, Long> likeCountMap = entityLikeCountMapper
-                .selectByIds(entityIds)
-                .stream()
-                .collect(Collectors.toMap(EntityLikeCount::getEntityId, EntityLikeCount::getLikeCount));
-
-        //收藏数
-        Map<Long, Long> starCountMap = entityStarCountMapper
-                .selectByIds(entityIds).stream()
-                .collect(Collectors.toMap(EntityStarCount::getEntityId, EntityStarCount::getStarCount));
-
-        //浏览量
-        Map<Long, Long> viewCountMap = entityViewMapper
-                .selectByIds(entityIds)
-                .stream()
-                .collect(Collectors.toMap(EntityView::getEntityId, EntityView::getView));
-
-        //组装
-        List<BasicBookVO> voList = books.stream().map(book -> {
-            BasicBookVO vo = BeanUtil.copyProperties(book, BasicBookVO.class);
-            Long id = vo.getId();
-            //作者信息填充
-            String username = userMap.get(vo.getUserId());
-            vo.setUsername(username);
-
-            //点赞数填充
-            Long likeCount = likeCountMap.get(id);
-            Long starCount = starCountMap.get(id);
-            Long viewCount = viewCountMap.get(id);
-            vo.setLikeCount(likeCount);
-            vo.setStarCount(starCount);
-            vo.setViewCount(viewCount);
-
-            //是否点赞
-            vo.setLike(likeList.contains(id) ? 1 : 0);
-            //是否收藏
-            vo.setStar(starList.contains(id) ? 1 : 0);
-            return vo;
-        }).toList();
-
-        //6.拿到最后一项id，传给前端
-        Long maxId = voList.get(voList.size() - 1).getId();
-
-        //8.整合其他数据，如用户数据，点赞数据，收藏数据，观看数数据
-        PageDTO<BasicBookVO> pageDTO = new PageDTO<>(page.getTotal(), page.getPages(), maxId, voList);
-        return Result.success(pageDTO);
+        return getPageByHotResult(page, eq);
     }
 
     /**
@@ -251,7 +173,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     public Result deleteBookById(Long id) {
 
         //先查询
-        Book one = lambdaQuery().eq(Book::getId, id).one();
+        Book one = lambdaQuery()
+                .eq(Book::getId, id)
+                .eq(Book::getUserId, UserHolder.getUser().getId())
+                .one();
 
         //再保存
         DeleteBook deleteBook = BeanUtil.copyProperties(one, DeleteBook.class);
@@ -261,11 +186,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         remove(
                 new LambdaQueryWrapper<Book>().eq(Book::getId, id)
         );
-        //再分页 TODO 分页
-        Page<Book> bookPage = page(new Page<>(2, 2));
-        List<Book> records = bookPage.getRecords();
-        List<BookVO> bookVOS = BeanUtil.copyToList(records, BookVO.class);
-        return Result.success(bookVOS);
+        //返回分页再发一个请求
+        return Result.success();
     }
 
     /**
@@ -273,34 +195,21 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
      * @return 分页查询结果
      */
     @Override
-    public Result queryMyBooksByHot() {
-        return commonQueryMyBookByHotOrTime("hot");
-    }
+    public Result queryMyBooksByHot(PageQuery pageQuery) {
 
-    /**
-     * 快速查询我的书，用时间排名
-     * @return 分页查询结果
-     */
-    @Override
-    public Result queryMyBooksByTime() {
-        return commonQueryMyBookByHotOrTime("time");
-    }
-
-    /**
-     * 根据热度或者时间进行初始化查询
-     * @param item 条件：热度或者时间
-     * @return 返回分页结果
-     */
-    private Result commonQueryMyBookByHotOrTime(String item) {
         //1.设置查询参数，关联热度表
-        Page<EntityHot> page = Page.of(1, 10);
+        Page<EntityHot> page = Page.of(pageQuery.getPageNo(), pageQuery.getPageSize());
         //设置查询条件
         LambdaQueryChainWrapper<EntityHot> eq = entityHotService
                 .lambdaQuery()
-                .eq(EntityHot::getEntityType, 1)
-                .orderByDesc(EntityHot::getHot);
+                .eq(EntityHot::getUserId, UserHolder.getUser().getId())
+                .eq(EntityHot::getEntityType, 0).orderByDesc(EntityHot::getHot);
+        return getPageByHotResult(page, eq);
+    }
+
+    private Result getPageByHotResult(Page<EntityHot> page, LambdaQueryChainWrapper<EntityHot> eq) {
         //3.进行查询，获取热度前几
-        entityHotService.page(page,eq);
+        entityHotService.page(page, eq);
         //4.获取相关的实体id
         List<Long> entityIds = page.getRecords().stream().map(EntityHot::getEntityId).toList();
         //获取书（实体）
@@ -378,4 +287,111 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         PageDTO<BasicBookVO> pageDTO = new PageDTO<>(page.getTotal(), page.getPages(), maxId, voList);
         return Result.success(pageDTO);
     }
+
+    /**
+     * 快速查询我的书，用时间排名
+     * @return 分页查询结果
+     */
+    @Override
+    public Result queryMyBooksByTime(PageQuery pageQuery) {
+        //1.设置查询参数，关联热度表
+        Page<Book> page = Page.of(pageQuery.getPageNo(), pageQuery.getPageSize());
+        //设置查询条件
+        LambdaQueryChainWrapper<Book> eq = lambdaQuery()
+                .eq(Book::getUserId, UserHolder.getUser().getId())
+                .orderByDesc(Book::getCreateTime);
+        return getPageByTimeResult(page, eq);
+    }
+
+    private Result getPageByTimeResult(Page<Book> page, LambdaQueryChainWrapper<Book> eq) {
+        //3.进行查询，获取热度前几
+        page(page, eq);
+        //4.获取相关的实体id
+        List<Long> entityIds = page.getRecords().stream().map(Book::getId).toList();
+        //获取书（实体）
+        List<Book> books = page.getRecords();
+
+        //再通过书获取用户id集合和点赞和收藏和阅览
+        Set<Long> userIds = books.stream().map(Book::getUserId).collect(Collectors.toSet());
+
+        //userId::username
+        Map<Long, String> userMap = userMapper
+                .selectByIds(userIds).stream().collect(Collectors.toMap(User::getId, User::getUsername));
+
+        List<EntityLike> entityLikes = entityLikeMapper.selectList(
+                new LambdaQueryWrapper<EntityLike>()
+                        .eq(EntityLike::getUserId, UserHolder.getUser().getId())
+                        .in(EntityLike::getEntityId, entityIds)
+        );
+
+        // 点赞过的文章id列表
+        List<Long> likeList = entityLikes.stream().map(EntityLike::getEntityId).toList();
+
+        List<EntityStar> entityStars = entityStarMapper.selectList(
+                new LambdaQueryWrapper<EntityStar>()
+                        .eq(EntityStar::getUserId, UserHolder.getUser().getId())
+                        .in(EntityStar::getEntityId, entityIds)
+        );
+
+        //收藏过的id列表
+        List<Long> starList = entityStars.stream().map(EntityStar::getEntityId).toList();
+
+        //点赞数
+        Map<Long, Long> likeCountMap = entityLikeCountMapper
+                .selectByIds(entityIds)
+                .stream()
+                .collect(Collectors.toMap(EntityLikeCount::getEntityId, EntityLikeCount::getLikeCount));
+
+        //收藏数
+        Map<Long, Long> starCountMap = entityStarCountMapper
+                .selectByIds(entityIds).stream()
+                .collect(Collectors.toMap(EntityStarCount::getEntityId, EntityStarCount::getStarCount));
+
+        //浏览量
+        Map<Long, Long> viewCountMap = entityViewMapper
+                .selectByIds(entityIds)
+                .stream()
+                .collect(Collectors.toMap(EntityView::getEntityId, EntityView::getView));
+
+        //组装
+        List<BasicBookVO> voList = books.stream().map(book -> {
+            BasicBookVO vo = BeanUtil.copyProperties(book, BasicBookVO.class);
+            Long id = vo.getId();
+            //作者信息填充
+            String username = userMap.get(vo.getUserId());
+            vo.setUsername(username);
+
+            //点赞数填充
+            Long likeCount = likeCountMap.get(id);
+            Long starCount = starCountMap.get(id);
+            Long viewCount = viewCountMap.get(id);
+            vo.setLikeCount(likeCount);
+            vo.setStarCount(starCount);
+            vo.setViewCount(viewCount);
+
+            //是否点赞
+            vo.setLike(likeList.contains(id) ? 1 : 0);
+            //是否收藏
+            vo.setStar(starList.contains(id) ? 1 : 0);
+            return vo;
+        }).toList();
+
+        //6.拿到最后一项id，传给前端
+        Long maxId = voList.get(voList.size() - 1).getId();
+
+        //8.整合其他数据，如用户数据，点赞数据，收藏数据，观看数数据
+        PageDTO<BasicBookVO> pageDTO = new PageDTO<>(page.getTotal(), page.getPages(), maxId, voList);
+        return Result.success(pageDTO);
+    }
+
+    @Override
+    public Result pageBookByTime(PageQuery pageQuery) {
+        //1.设置查询参数，关联热度表
+        Page<Book> page = Page.of(pageQuery.getPageNo(), pageQuery.getPageSize());
+        //设置查询条件
+        LambdaQueryChainWrapper<Book> eq = lambdaQuery().orderByDesc(Book::getCreateTime);
+        //3.进行查询，获取热度前几
+        return getPageByTimeResult(page, eq);
+    }
+
 }

@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS `entity_hot` (
                                              `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                              `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                                                  ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                             `user_id` BIGINT NOT NULL COMMENT '关联的用户id，用于做自己的热度查询',
                                              PRIMARY KEY (`entity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='书籍表';
 
@@ -293,13 +294,11 @@ CREATE TABLE `shop_order` (
                               `quantity` INT NOT NULL COMMENT '购买数量',
                               `unit_price` BIGINT NOT NULL COMMENT '下单时商品单价，单位：gold',
                               `total_price` BIGINT NOT NULL COMMENT '订单总价，单位：gold',
-                              `status` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '订单状态：0待处理，1已完成，2已取消',
                               `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '下单时间',
                               `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                               PRIMARY KEY (`id`),
                               KEY `idx_user_time` (`user_id`, `create_time`, `id`),
-                              KEY `idx_shop_id` (`shop_id`),
-                              KEY `idx_status_time` (`status`, `create_time`, `id`)
+                              KEY `idx_shop_id` (`shop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品订单表';
 
 CREATE TABLE `shop_comment` (
@@ -377,3 +376,17 @@ CREATE TABLE IF NOT EXISTS `mailbox` (
                                          KEY `idx_receiver_time` (`user_id`, `is_deleted_user`, `send_time`, `id`),
                                          KEY `idx_sender_time` (`send_id`, `is_deleted_send`, `send_time`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='私信表';
+
+CREATE TABLE IF NOT EXISTS `comment` (
+                                              `id` BIGINT NOT NULL COMMENT '评论id',
+                                              `entity_id` BIGINT NOT NULL COMMENT '所属实体id',
+                                              `root` BIGINT DEFAULT 0 COMMENT '顶层评论id，0表示顶层评论',
+                                              `user_id` BIGINT NOT NULL COMMENT '发表者id',
+                                              `content` VARCHAR(255) NOT NULL COMMENT '评论内容',
+                                              `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发表时间',
+                                              `parent_id` BIGINT DEFAULT NULL COMMENT '实际回复的评论id',
+                                              PRIMARY KEY (`id`),
+                                              KEY `idx_block_parent_time` (`entity_id`, `root`, `create_time`, `id`),
+                                              KEY `idx_book_time` (`entity_id`, `create_time`, `id`),
+                                              KEY `idx_user_time` (`user_id`, `create_time`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论表';

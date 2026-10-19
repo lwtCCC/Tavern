@@ -29,4 +29,6 @@ public interface UserService extends IService<User> {
     Result resetPassword(ResetPasswordDTO resetPasswordDTO);
 
     Result resetProfile(String profile);
+
+    Result deleteMe();
 }

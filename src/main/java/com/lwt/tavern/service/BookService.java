@@ -17,7 +17,9 @@ public interface BookService extends IService<Book> {
 
     Result deleteBookById(Long id);
 
-    Result queryMyBooksByHot();
+    Result queryMyBooksByHot(PageQuery pageQuery);
 
-    Result queryMyBooksByTime();
+    Result queryMyBooksByTime(PageQuery pageQuery);
+
+    Result pageBookByTime(PageQuery pageQuery);
 }

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/InteractionController")
+@RequestMapping("/entity")
 @RequiredArgsConstructor
 public class InteractionController {
 
@@ -17,6 +17,7 @@ public class InteractionController {
     private final EntityLikeCountService entityLikeCountService;
     private final EntityStarCountService entityStarCountService;
     private final EntityViewService entityViewService;
+    private final EntityHotService entityHotService;
 
     @GetMapping("/like/count/{id}")
     public Result getLikeCount(@PathVariable Long id) {
@@ -26,6 +27,11 @@ public class InteractionController {
     @GetMapping("/star/count/{id}")
     public Result getStarCount(@PathVariable Long id) {
         return entityStarCountService.getStarCount(id);
+    }
+
+    @GetMapping("/hot/{id}")
+    public Result getHot(@PathVariable Long id) {
+        return entityHotService.getHot(id);
     }
 
     @PostMapping("/like/act")

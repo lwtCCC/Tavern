@@ -24,6 +24,14 @@ public class BookController {
     }
 
     /**
+     * 分页查询，用于首页第一次展示
+     */
+    @GetMapping("/page/time")
+    public Result pageBookByTime(PageQuery pageQuery) {
+        return bookService.pageBookByTime(pageQuery);
+    }
+
+    /**
      * 查看具体的书
      * @param id 书的id
      * @return 书的具体信息
@@ -58,8 +66,8 @@ public class BookController {
      * @return 分页查询结果
      */
     @GetMapping("/me/hot")
-    public Result queryMyBooksByHot(){
-        return bookService.queryMyBooksByHot();
+    public Result queryMyBooksByHot(PageQuery pageQuery){
+        return bookService.queryMyBooksByHot(pageQuery);
     }
 
     /**
@@ -67,7 +75,9 @@ public class BookController {
      * @return 分页查询结果
      */
     @GetMapping("/me/time")
-    public Result queryMyBooksByTime(){
-        return bookService.queryMyBooksByTime();
+    public Result queryMyBooksByTime(PageQuery pageQuery){
+        return bookService.queryMyBooksByTime(pageQuery);
     }
+
+    //搜索es
 }

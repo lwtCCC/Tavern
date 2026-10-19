@@ -2,8 +2,8 @@ package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.dto.shop.ShopDTO;
-import com.lwt.tavern.dto.shop.ShopWithUpdateDTO;
-import com.lwt.tavern.query.ShopQuery;
+import com.lwt.tavern.dto.shop.ShopOrderDTO;
+import com.lwt.tavern.query.PageQuery;
 import com.lwt.tavern.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,42 @@ public class ShopController {
 
     /**
      * 分页功能实现
-     * @param shopQuery
+     * @param pageQuery
      * @return
      */
-    @GetMapping("/page")
-    public Result pageShops(ShopQuery shopQuery) {
-        return shopService.pageShops(shopQuery);
+    @GetMapping("/page/hot")
+    public Result pageShopsByHot(PageQuery pageQuery) {
+        return shopService.pageShopsByHot(pageQuery);
+    }
+
+    /**
+     * 分页功能实现
+     * @param pageQuery
+     * @return
+     */
+    @GetMapping("/page/time")
+    public Result pageShopsByTime(PageQuery pageQuery) {
+        return shopService.pageShopsByTime(pageQuery);
+    }
+
+    /**
+     * 分页功能实现
+     * @param pageQuery
+     * @return
+     */
+    @GetMapping("/page/hot/me")
+    public Result pageShopsByHotWithMe(PageQuery pageQuery) {
+        return shopService.pageShopsByHotWithMe(pageQuery);
+    }
+
+    /**
+     * 分页功能实现
+     * @param pageQuery
+     * @return
+     */
+    @GetMapping("/page/time/me")
+    public Result pageShopsByTimeWithMe(PageQuery pageQuery) {
+        return shopService.pageShopsByTimeWithMe(pageQuery);
     }
 
     /**
@@ -35,38 +65,28 @@ public class ShopController {
         return shopService.shopDetail(id);
     }
 
-    /**
-     * 我发布过的商品
-     * @param shopQuery
-     * @return
-     */
-    @GetMapping("/page/me")
-    public Result pageShopsWithMe(ShopQuery shopQuery) {
-        return shopService.pageShopsWithMe(shopQuery);
-    }
-
     //删除
     @PutMapping("/delete")
-    public Result deleteShop(@RequestBody ShopDTO shopDTO) {
-        return shopService.deleteShop(shopDTO);
+    public Result deleteShop(@RequestBody Long id) {
+        return shopService.deleteShop(id);
     }
 
     //修改
-    @PutMapping("/delete")
-    public Result updateShop(@RequestBody ShopWithUpdateDTO shopWithUpdateDTO) {
-        return shopService.updateShop(shopWithUpdateDTO);
+    @PutMapping("/update")
+    public Result updateShop(@RequestBody ShopDTO shopDTO) {
+        return shopService.updateShop(shopDTO);
     }
 
     //发布
     @PostMapping("/public")
-    public Result publicShop(@RequestBody ShopWithUpdateDTO shopWithUpdateDTO) {
-        return shopService.publicShop(shopWithUpdateDTO);
+    public Result publicShop(@RequestBody ShopDTO shopDTO) {
+        return shopService.publicShop(shopDTO);
     }
 
     //购买
-    /*@PostMapping("/buy")
-    public Result addOrder(@RequestBody ShopDTO shopDTO) {
-        return
-    }*/
+    @PostMapping("/buy")
+    public Result addOrder(@RequestBody ShopOrderDTO shopOrderDTO) {
+        return shopService.addOrder(shopOrderDTO);
+    }
 
 }

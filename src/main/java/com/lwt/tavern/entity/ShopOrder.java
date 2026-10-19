@@ -47,10 +47,6 @@ public class ShopOrder implements Serializable {
      */
     private Long totalPrice;
     /**
-     * 状态：0待处理，1已付款，2取消订单
-     */
-    private Short status;
-    /**
      * 创建时间
      */
     private LocalDateTime createTime;

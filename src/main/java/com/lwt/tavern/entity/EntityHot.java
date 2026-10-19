@@ -31,6 +31,10 @@ public class EntityHot implements Serializable {
      */
     private Long hot;
     /**
+     * 用户id
+     */
+    private Long userId;
+    /**
      * 实体类型：0书，1商品
      */
     private Short entityType;

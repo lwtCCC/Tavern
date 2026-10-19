@@ -1,6 +1,5 @@
 package com.lwt.tavern.common;
 
-import com.lwt.tavern.dto.shop.ShopWithUpdateDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
