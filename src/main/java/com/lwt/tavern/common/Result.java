@@ -14,7 +14,7 @@ public class Result{
 
     /**
      * 成功返回消息
-     * @return
+     * @return 无消息成功
      */
     public static Result success(){
         return new Result(true,null,null);
@@ -23,7 +23,7 @@ public class Result{
     /**
      * 成功返回附带数据的消息
      * @param data 返回的数据
-     * @return
+     * @return 带消息成功
      */
     public static Result success(Object data){
         return new Result(true,null,data);
@@ -32,7 +32,7 @@ public class Result{
     /**
      * 失败返回消息
      * @param errorMsg 失败的消息
-     * @return
+     * @return 带消息失败
      */
     public static Result fail(String errorMsg){
         return new Result(false,errorMsg,null);

@@ -1,4 +1,4 @@
-package com.lwt.tavern.entity;
+package com.lwt.tavern.entity.delete;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -10,44 +10,40 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 私信
- */
 @Data
-@AllArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
 @Accessors(chain = true)
-@TableName("`mailbox`")
-public class MailBox implements Serializable {
+@TableName("`delete_comment`")
+public class DeleteComment implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
-     * 信件id
+     * 段评id
      */
     private Long id;
     /**
-     * 发信人
+     * 书本id
+     */
+    private Long entityId;
+    /**
+     * 内容块id
+     */
+    private Long root;
+    /**
+     * 评论用户id
      */
     private Long userId;
     /**
-     * 信的内容
+     * 父评论
      */
-    private String mailContent;
+    private Long parentId;
     /**
-     * 送达时间
+     * 评论内容
      */
-    private LocalDateTime sendTime;
+    private String content;
     /**
-     * 接收人id
+     * 创建时间
      */
-    private Long sendId;
-    /**
-     * 发信者是否可见
-     */
-    private Short deletedUser;
-    /**
-     * 收信人是否可见
-     */
-    private Short deletedSend;
+    private LocalDateTime createTime;
 }

@@ -14,7 +14,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @GetMapping("/hot")
+    @GetMapping("/page")
     public Result getRootComment(PageCommentQuery query){
         return commentService.getRootComment(query);
     }

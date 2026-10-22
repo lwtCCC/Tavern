@@ -2,6 +2,7 @@ package com.lwt.tavern.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("`entity_like`")
@@ -34,10 +36,7 @@ public class EntityLike implements Serializable {
      * 实体类型：0书，1商品
      */
     private Short entityType;
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
+    private Short isLike;
     /**
      * 更新时间
      */

@@ -1,4 +1,4 @@
-package com.lwt.tavern.entity;
+package com.lwt.tavern.entity.delete;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -10,27 +10,37 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 用户（删除用）
+ */
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("`entity_hot`")
-public class EntityHotComment implements Serializable {
+@TableName("`delete_user`")
+public class DeleteUser implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
-     * 具体id
+     * 用户id
      */
     private Long id;
     /**
-     * 关联的实体id
+     * 用户名
      */
-    private Long entityId;
+    private String username;
     /**
-     * 热度
+     * 密码
      */
-    private Long hot;
+    private String password;
+    /**
+     * 头像
+     */
+    private String avatar;
+    /**
+     * 简介
+     */
+    private String profile;
     /**
      * 创建时间
      */
@@ -39,4 +49,8 @@ public class EntityHotComment implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    /**
+     * 手机号
+     */
+    private String phone;
 }

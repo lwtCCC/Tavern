@@ -36,19 +36,23 @@ public class BookContentBlock implements Serializable {
      */
     private Integer blockIndex;
     /**
-     * 内容
-     */
-    private String content;
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-    /**
      * 段评类型，用于渲染markdown
      */
     private String blockType;
     /**
-     * 类型，如语言：java，python之类的
+     * 属性，如语言：java，python之类的
      */
     private Map<String, Object> attributes;
+    /**
+     * 内容
+     */
+    private String content;
+
+    private Long commentCount;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+
 }

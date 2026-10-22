@@ -19,6 +19,19 @@ spring:
       lettuce:
         pool:
           max-active: 10
+  rabbitmq:
+    host: ${db.mq.host} # 你的虚拟机IP
+    port: ${db.mq.port} # 端口
+    virtual-host: ${db.mq.virtual-host} # 虚拟主机
+    username: ${db.mq.username} # 用户名
+    password: ${db.mq.password} # 密码
+    listener:
+      simple:
+        consumer-batch-enabled: true
+        batch-size: 100
+        prefetch: 100
+        acknowledge-mode: auto
+
   security:
     user:
       name: user
@@ -29,3 +42,9 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    bucketName: lwt-web
+    region: cn-beijing

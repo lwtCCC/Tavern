@@ -1,7 +1,10 @@
 package com.lwt.tavern.dto;
 
+import com.lwt.tavern.vo.CommentVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -11,7 +14,7 @@ public class CommentDTO {
      */
     private Long entityId;
     /**
-     * 是否是根评论
+     * 根评论
      */
     private Long root;
     /**
@@ -22,4 +25,5 @@ public class CommentDTO {
      * 评论内容
      */
     private String content;
+    private List<CommentVO> voList;
 }

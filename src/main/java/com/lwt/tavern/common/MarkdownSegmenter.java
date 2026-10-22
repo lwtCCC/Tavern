@@ -28,8 +28,8 @@ public class MarkdownSegmenter {
         int seq = 1;
         while (child != null) {
             BookContentBlock bookContentBlock = new BookContentBlock(
-                    id, bookId, seq++, sliceSource(markdown, child), LocalDateTime.now(),
-                    detectType(child), extractAttributes(child)
+                    id, bookId, seq++,  detectType(child), extractAttributes(child),
+                    sliceSource(markdown, child),0L, LocalDateTime.now()
             );
 
             segments.add(bookContentBlock);

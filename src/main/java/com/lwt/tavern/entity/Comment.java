@@ -27,17 +27,13 @@ public class Comment implements Serializable {
      */
     private Long entityId;
     /**
-     * 内容块id
-     */
-    private Long root;
-    /**
      * 评论用户id
      */
     private Long userId;
     /**
-     * 父评论
+     * 内容块id
      */
-    private Long parentId;
+    private Long root;
     /**
      * 评论内容
      */
@@ -46,4 +42,10 @@ public class Comment implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
+    /**
+     * 父评论
+     */
+    private Long parentId;
+    private Long likeCount;
+    private Long hot;
 }

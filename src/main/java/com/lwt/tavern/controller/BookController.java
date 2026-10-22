@@ -1,6 +1,8 @@
 package com.lwt.tavern.controller;
 
 import com.lwt.tavern.common.Result;
+import com.lwt.tavern.dto.EntityLikeDTO;
+import com.lwt.tavern.dto.EntityStarDTO;
 import com.lwt.tavern.dto.book.BookDTO;
 import com.lwt.tavern.query.PageQuery;
 import com.lwt.tavern.service.BookService;
@@ -17,17 +19,9 @@ public class BookController {
     /**
      * 分页查询，用于首页第一次展示
      */
-    @GetMapping("/page/hot")
-    public Result pageBookByHot(PageQuery pageQuery) {
-        return bookService.pageBookByHot(pageQuery);
-    }
-
-    /**
-     * 分页查询，用于首页第一次展示
-     */
-    @GetMapping("/page/time")
-    public Result pageBookByTime(PageQuery pageQuery) {
-        return bookService.pageBookByTime(pageQuery);
+    @GetMapping("/page")
+    public Result pageBook(PageQuery pageQuery) {
+        return bookService.pageBook(pageQuery);
     }
 
     /**
@@ -64,18 +58,19 @@ public class BookController {
      * 查询自己的书，按热度
      * @return 分页查询结果
      */
-    @GetMapping("/me/hot")
-    public Result queryMyBooksByHot(PageQuery pageQuery){
-        return bookService.queryMyBooksByHot(pageQuery);
+    @GetMapping("/page/me")
+    public Result queryMyBooks(PageQuery pageQuery){
+        return bookService.queryMyBooks(pageQuery);
     }
 
-    /**
-     * 查询自己的书，按时间
-     * @return 分页查询结果
-     */
-    @GetMapping("/me/time")
-    public Result queryMyBooksByTime(PageQuery pageQuery){
-        return bookService.queryMyBooksByTime(pageQuery);
+    @PostMapping("like")
+    public Result likeBook(@RequestBody EntityLikeDTO dto){
+        return  bookService.likeBook(dto);
+    }
+
+    @PostMapping("star")
+    public Result starBook(@RequestBody EntityStarDTO dto){
+        return  bookService.starBook(dto);
     }
 
     //搜索es

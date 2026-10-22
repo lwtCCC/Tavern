@@ -1,7 +1,7 @@
 package com.lwt.tavern.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lwt.tavern.entity.DeleteBook;
+import com.lwt.tavern.entity.delete.DeleteBook;
 
 public interface DeleteBookMapper extends BaseMapper<DeleteBook> {
 }

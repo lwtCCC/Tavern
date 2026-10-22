@@ -15,11 +15,11 @@ public class EntityLikeDTO {
      */
     private Long userId;
     /**
-     * 实体类型：0书，1商品
+     * 实体类型：0书，1商品，2段评
      */
     private Short entityType;
     /**
-     * 行为：0取消点赞，1点赞
+     * 执行的操作：0取消，1点赞
      */
-    private Integer status;
+    private Boolean isLike;
 }

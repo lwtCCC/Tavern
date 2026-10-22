@@ -46,6 +46,8 @@ public class BasicBookVO {
      */
     private String username;
 
+    private String avatar;
+
     /**
      *  是否点赞
      */

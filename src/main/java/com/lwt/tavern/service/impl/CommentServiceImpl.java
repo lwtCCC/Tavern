@@ -11,14 +11,14 @@ import com.lwt.tavern.common.UserHolder;
 import com.lwt.tavern.dto.CommentDTO;
 import com.lwt.tavern.dto.PageDTO;
 import com.lwt.tavern.entity.*;
+import com.lwt.tavern.entity.delete.DeleteComment;
 import com.lwt.tavern.mapper.CommentMapper;
-import com.lwt.tavern.mapper.EntityLikeCountMapper;
 import com.lwt.tavern.mapper.EntityLikeMapper;
 import com.lwt.tavern.mapper.UserMapper;
 import com.lwt.tavern.query.PageCommentQuery;
 import com.lwt.tavern.service.CommentService;
 import com.lwt.tavern.service.DeleteCommentService;
-import com.lwt.tavern.service.EntityHotCommentService;
+import com.lwt.tavern.service.UserService;
 import com.lwt.tavern.vo.CommentVO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -32,27 +32,21 @@ import java.util.stream.Collectors;
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
 
-
-    private final CommentMapper commentMapper;
-    private final EntityHotCommentService entityHotCommentService;
-    private final UserMapper userMapper;
+    private final UserService userService;
     private final EntityLikeMapper entityLikeMapper;
-    private final EntityLikeCountMapper entityLikeCountMapper;
     private final SnowFlake commentSnowFlake;
     private final DeleteCommentService deleteCommentService;
+    private final UserMapper userMapper;
 
-    public CommentServiceImpl(CommentMapper commentMapper,
-                              EntityHotCommentService entityHotCommentService,
-                              UserMapper userMapper, EntityLikeMapper entityLikeMapper,
-                              EntityLikeCountMapper entityLikeCountMapper,
-                              @Qualifier("commentSnowFlake") SnowFlake commentSnowFlake, DeleteCommentService deleteCommentService) {
-        this.commentMapper = commentMapper;
-        this.entityHotCommentService = entityHotCommentService;
-        this.userMapper = userMapper;
+    public CommentServiceImpl(EntityLikeMapper entityLikeMapper,
+                              @Qualifier("commentSnowFlake") SnowFlake commentSnowFlake,
+                              DeleteCommentService deleteCommentService,
+                              UserService userService,UserMapper userMapper) {
+        this.userService = userService;
         this.entityLikeMapper = entityLikeMapper;
-        this.entityLikeCountMapper = entityLikeCountMapper;
         this.commentSnowFlake = commentSnowFlake;
         this.deleteCommentService = deleteCommentService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -60,26 +54,42 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
         //分页获取
         //先通过热度获取实体ids
-        Page<EntityHotComment> page = Page.of(0, 10);
+        Page<Comment> page = Page.of(0, 10);
 
-        LambdaQueryChainWrapper<EntityHotComment> eq = entityHotCommentService.lambdaQuery()
-                .eq(EntityHotComment::getEntityId, query.getId());
+        LambdaQueryChainWrapper<Comment> eq;
+        //评论表的设计
+        /*
+          评论表的设计
+          id，主要作用是作为的子评论的parentId
+          entityId 关联的大实体，也就是段落和商品
+          userId，方便查找自己的评论和用来关联评论人信息
+          root，为0就是跟评论，子评论的root指向跟评论的id
+          content是内容
+          createTime是发布时间
+          parentId指向实际回复人，当前评论为根时，parentId为0
+          likeCount为点赞数
+          commentCount为子评论数，统计方法为查找和自己id一样的root评论’
+          hot就是热度
+         */
 
-        entityHotCommentService.page(page, eq);
+        eq = lambdaQuery()
+                .eq(Comment::getRoot,query.getId())
+                .eq(Comment::getEntityId,query.getEntityId())
+                .orderByDesc(query.getIsHot()?Comment::getHot:Comment::getCreateTime);
 
-        List<EntityHotComment> records = page.getRecords();
+        page(page, eq);
+
+        List<Comment> comments = page.getRecords();
+
         //实体id集合,每条评论的id
-        List<Long> ids = records.stream().map(EntityHotComment::getId).toList();
-
-        //相关评论列表
-        List<Comment> comments = commentMapper.selectByIds(ids);
+        List<Long> ids = comments.stream().map(Comment::getId).toList();
 
         //涉及到的所用用户id
         Set<Long> userIds = comments.stream().map(Comment::getUserId).collect(Collectors.toSet());
 
-        Map<Long, String> userMap = userMapper
+        Map<Long, User> userMap = userMapper
                 .selectByIds(userIds)
-                .stream().collect(Collectors.toMap(User::getId, User::getUsername));
+                .stream().collect(Collectors.toMap(User::getId, u->u));
 
         List<EntityLike> entityLikes = entityLikeMapper.selectList(
                 new LambdaQueryWrapper<EntityLike>()
@@ -90,23 +100,15 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         // 点赞过的文章id列表
         List<Long> likeList = entityLikes.stream().map(EntityLike::getEntityId).toList();
 
-        //点赞数
-        Map<Long, Long> likeCountMap = entityLikeCountMapper
-                .selectByIds(ids)
-                .stream()
-                .collect(Collectors.toMap(EntityLikeCount::getEntityId, EntityLikeCount::getLikeCount));
-
         //组装
         List<CommentVO> voList = comments.stream().map(book -> {
             CommentVO vo = BeanUtil.copyProperties(book, CommentVO.class);
             Long id = vo.getId();
             //作者信息填充
-            String username = userMap.get(vo.getUserId());
-            vo.setUsername(username);
-
-            //点赞数填充
-            Long likeCount = likeCountMap.get(id);
-            vo.setLikeCount(likeCount);
+            User user = userMap.get(vo.getUserId());
+            vo.setUsername(user.getUsername());
+            vo.setUserId(user.getId());
+            vo.setAvatar(user.getAvatar());
 
             //是否点赞
             vo.setLike(likeList.contains(id) ? 1 : 0);
@@ -131,13 +133,17 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         long id = commentSnowFlake.nextId();
         comment.setId(id);
 
-        if (comment.getRoot() == 0) {
-            comment.setParentId(0L);
-        }
-
         comment.setCreateTime(LocalDateTime.now());
+        comment.setHot(0L);
+        comment.setLikeCount(0L);
         save(comment);
-        return Result.success();
+        List<CommentVO> voList = commentDTO.getVoList();
+        CommentVO e = BeanUtil.copyProperties(comment, CommentVO.class);
+        User user = userService.query().eq("id", userId).one();
+        e.setUsername(user.getUsername());
+        e.setAvatar(user.getAvatar());
+        voList.add(e);
+        return Result.success(voList);
     }
 
     @Override

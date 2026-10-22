@@ -21,7 +21,7 @@ public class UserTests {
 
     @Test
     void testSendCodeRegister() {
-        Result result = userService.sendCodeRegister("14762386203");
+        Result result = userService.sendRegisterCode("14762386203");
         System.out.println("验证码为: "+result.getData().toString());
     }
 

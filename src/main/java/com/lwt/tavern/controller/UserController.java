@@ -3,11 +3,9 @@ package com.lwt.tavern.controller;
 import com.lwt.tavern.common.Result;
 import com.lwt.tavern.dto.user.LoginDTO;
 import com.lwt.tavern.dto.user.ResetPasswordDTO;
-import com.lwt.tavern.dto.user.UserDTO;
 import com.lwt.tavern.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -27,15 +25,27 @@ public class UserController {
     public Result sendCode(@RequestParam("phone") String phone){
         return userService.sendCode(phone);
     }
+
     /**
      * 根据手机号发送验证码(注册用)
      * @param phone 手机号
      * @return 带有验证码的消息
      */
     @PostMapping("/register/code")
-    public Result sendCodeRegister(@RequestParam("phone") String phone){
-        return userService.sendCodeRegister(phone);
+    public Result sendRegisterCode(@RequestParam("phone") String phone){
+        return userService.sendRegisterCode(phone);
     }
+
+    /**
+     * 发送验证码（修改密码用的）
+     * @param phone 手机号码
+     * @return code
+     */
+    @PostMapping("/reset/code")
+    public Result resetSendCode(@RequestBody String phone){
+        return userService.resetSendCode(phone);
+    }
+
     /**
      * 注册功能
      * @param loginDTO 登录信息
@@ -84,24 +94,15 @@ public class UserController {
     }
 
     /**
-     * 发送验证码（修改密码用的）
-     * @param phone 手机号码
-     * @return code
-     */
-    @PostMapping("/reset/code")
-    public Result resetSendCode(@RequestBody String phone){
-        return userService.resetSendCode(phone);
-    }
-
-    /**
      * 修改密码的身份验证
-     * @param loginDTO 包含手机号和验证码
+     * @param loginDTO 手机号和验证码
      * @return 是否成功
      */
     @PostMapping("/reset/verify")
     public Result verify(@RequestBody LoginDTO loginDTO){
         return userService.verify(loginDTO);
     }
+
     /**
      * 修改密码
      * @param resetPasswordDTO 包含新密码和确认密码
@@ -114,14 +115,18 @@ public class UserController {
 
     /**
      * 修改简介
-     * @param profile
-     * @return
+     * @param profile 简介内容
+     * @return 用户基础信息
      */
     @PutMapping("/reset/profile")
     public Result resetProfile(@RequestBody String profile){
         return userService.resetProfile(profile);
     }
 
+    /**
+     * 注销
+     * @return 把自己删除
+     */
     @DeleteMapping("/me")
     public Result deleteMe(){
         return userService.deleteMe();

@@ -26,6 +26,7 @@ public class CommentVO {
      */
     private Long userId;
     private String username;
+    private String avatar;
     /**
      * 父评论
      */

@@ -8,21 +8,21 @@ import com.lwt.tavern.entity.User;
 
 public interface UserService extends IService<User> {
 
+    Result sendCode(String phone);
+
+    Result sendRegisterCode(String phone);
+
+    Result resetSendCode(String phone);
+
+    Result register(LoginDTO loginDTO);
+
     Result loginByUsername(LoginDTO loginDTO);
 
     Result loginByPhone(LoginDTO loginDTO);
 
-    Result register(LoginDTO loginDTO);
-
-    Result sendCode(String phone);
-
-    Result queryUserById(Long id);
-
-    Result sendCodeRegister(String phone);
-
     Result me();
 
-    Result resetSendCode(String phone);
+    Result queryUserById(Long id);
 
     Result verify(LoginDTO loginDTO);
 

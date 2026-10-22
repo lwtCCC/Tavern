@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @MapperScan("com.lwt.tavern.mapper")
-@SpringBootApplication
+//@SpringBootApplication
 public class TavernApplication {
 
     public static void main(String[] args) {

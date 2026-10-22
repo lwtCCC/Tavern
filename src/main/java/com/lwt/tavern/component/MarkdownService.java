@@ -1,4 +1,4 @@
-package com.lwt.tavern.service.impl;
+package com.lwt.tavern.component;
 
 import lombok.RequiredArgsConstructor;
 import org.commonmark.node.Node;

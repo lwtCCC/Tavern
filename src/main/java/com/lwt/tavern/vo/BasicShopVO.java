@@ -24,13 +24,4 @@ public class BasicShopVO {
      * 收藏数量
      */
     private Long starCount;
-
-    /**
-     *  是否点赞
-     */
-    private Integer like;
-    /**
-     * 是否收藏
-     */
-    private Integer star;
 }

@@ -34,6 +34,14 @@ public class Book implements Serializable {
      */
     private Long userId;
     /**
+     * 基础描述
+     */
+    private String description;
+    private Long view;
+    private Long likeCount;
+    private Long starCount;
+    private Long hot;
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -41,8 +49,5 @@ public class Book implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
-    /**
-     * 基础描述
-     */
-    private String description;
+
 }

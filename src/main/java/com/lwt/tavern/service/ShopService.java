@@ -8,7 +8,7 @@ import com.lwt.tavern.entity.Shop;
 import com.lwt.tavern.query.PageQuery;
 
 public interface ShopService extends IService<Shop> {
-    Result pageShopsByHot(PageQuery pageQuery);
+    Result pageShops(PageQuery pageQuery);
 
     Result shopDetail(Long id);
 
@@ -18,11 +18,7 @@ public interface ShopService extends IService<Shop> {
 
     Result publicShop(ShopDTO shopDTO);
 
-    Result pageShopsByTime(PageQuery pageQuery);
-
-    Result pageShopsByHotWithMe(PageQuery pageQuery);
-
-    Result pageShopsByTimeWithMe(PageQuery pageQuery);
+    Result pageShopsWithMe(PageQuery pageQuery);
 
     Result addOrder(ShopOrderDTO shopOrderDTO);
 }

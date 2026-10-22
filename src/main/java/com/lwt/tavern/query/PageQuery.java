@@ -20,7 +20,11 @@ public class PageQuery {
      */
     private Long maxId;
     /**
+     * 按热度或者按时间
+     */
+    private Boolean isHot;
+    /**
      * 是否升序
      */
-    private Boolean isAsc=true;
+    private Boolean isAsc=false;
 }

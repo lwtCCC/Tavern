@@ -7,15 +7,26 @@ import lombok.Data;
 @AllArgsConstructor
 public class PageCommentQuery {
     /**
-     *  实体id
+     * 评论id，没有的话默认0
      */
     private Long id;
+    /**
+     *  实体id
+     */
+    private Long entityId;
     /**
      * 上次查询的最大值，用于优化深度分页
      */
     private Long maxId;
+
+    /**
+     * 段落或者商店商店0 评论1
+     */
+    private Integer type;
+
+    private Boolean isHot;
     /**
      * 是否升序
      */
-    private Boolean isAsc=true;
+    private Boolean isAsc = false;
 }

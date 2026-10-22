@@ -20,9 +20,9 @@ public class ShopController {
      * @param pageQuery
      * @return
      */
-    @GetMapping("/page/hot")
-    public Result pageShopsByHot(PageQuery pageQuery) {
-        return shopService.pageShopsByHot(pageQuery);
+    @GetMapping("/page")
+    public Result pageShops(PageQuery pageQuery) {
+        return shopService.pageShops(pageQuery);
     }
 
     /**
@@ -30,29 +30,9 @@ public class ShopController {
      * @param pageQuery
      * @return
      */
-    @GetMapping("/page/time")
-    public Result pageShopsByTime(PageQuery pageQuery) {
-        return shopService.pageShopsByTime(pageQuery);
-    }
-
-    /**
-     * 分页功能实现
-     * @param pageQuery
-     * @return
-     */
-    @GetMapping("/page/hot/me")
-    public Result pageShopsByHotWithMe(PageQuery pageQuery) {
-        return shopService.pageShopsByHotWithMe(pageQuery);
-    }
-
-    /**
-     * 分页功能实现
-     * @param pageQuery
-     * @return
-     */
-    @GetMapping("/page/time/me")
-    public Result pageShopsByTimeWithMe(PageQuery pageQuery) {
-        return shopService.pageShopsByTimeWithMe(pageQuery);
+    @GetMapping("/page/me")
+    public Result pageShopsWithMe(PageQuery pageQuery) {
+        return shopService.pageShopsWithMe(pageQuery);
     }
 
     /**

@@ -8,12 +8,13 @@ import lombok.Data;
 public class ShopDTO {
 
     private Long id;
+    private Long userId;
 
-    private String name;
+    private String shopName;
 
     private String description;
 
-    private Long price;
+    private Long unitPrice;
 
     private Integer stock;
 

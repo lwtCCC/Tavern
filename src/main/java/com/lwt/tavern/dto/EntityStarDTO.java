@@ -20,7 +20,7 @@ public class EntityStarDTO {
      */
     private Short entityType;
     /**
-     * 行为：0取消收藏，1收藏
+     * 执行的操作：0取消，1点赞
      */
-    private Integer status;
+    private Boolean isStar;
 }

@@ -11,39 +11,23 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@EqualsAndHashCode
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("`delete_comment`")
-public class DeleteComment implements Serializable {
+@TableName("`message`")
+public class Message implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    /**
-     * 段评id
-     */
+
     private Long id;
-    /**
-     * 书本id
-     */
+    private Long senderId;
+    private Long receiverId;
     private Long entityId;
-    /**
-     * 内容块id
-     */
-    private Long root;
-    /**
-     * 评论用户id
-     */
-    private Long userId;
-    /**
-     * 父评论
-     */
-    private Long parentId;
-    /**
-     * 评论内容
-     */
+    private Integer type;
+    private String title;
     private String content;
-    /**
-     * 创建时间
-     */
+    private Integer actionType;
+    private Integer isRead;
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

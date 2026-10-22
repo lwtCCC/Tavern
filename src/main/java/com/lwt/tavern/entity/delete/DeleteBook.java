@@ -1,4 +1,4 @@
-package com.lwt.tavern.entity;
+package com.lwt.tavern.entity.delete;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
